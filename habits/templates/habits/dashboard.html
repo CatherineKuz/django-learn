@@ -1,67 +1,90 @@
 <!DOCTYPE html>
-  <html lang="ru">
-  <head>
+<html lang="ru">
+<head>
     <meta charset="UTF-8">
     <title>Привычки</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  </head>
-  <body class="bg-light">
-  <nav class="navbar navbar-dark bg-dark mb-4">
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-dark bg-dark mb-4">
     <div class="container-fluid">
-      <span class="navbar-brand">Привычки</span>
-      <form method="post" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-sm btn-outline-light">Выйти</button>
-      </form>
+        <span class="navbar-brand">Привычки</span>
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-light">Выйти</button>
+        </form>
     </div>
-  </nav>
+</nav>
 
-  <div class="container">
+<div class="container">
 
-    <form method="post" action="{% url 'habit-add' %}" class="d-flex gap-2 mb-4">
-      {% csrf_token %}
-      <input type="text" name="name" class="form-control" placeholder="Новая привычка" required>
-      <button type="submit" class="btn btn-primary">Добавить</button>
+    <form method="post" action="{% url 'habit-add' %}" class="d-flex gap-2 mb-4 align-items-end">
+        {% csrf_token %}
+        <div>
+            <label class="form-label mb-1">Название</label>
+            <input type="text" name="name" class="form-control" placeholder="Новая привычка" required>
+        </div>
+        <div>
+            <label class="form-label mb-1">Частота</label>
+            <select name="frequency_type" class="form-select">
+                <option value="daily">Каждый день</option>
+                <option value="every_n_days">Каждые N дней</option>
+            </select>
+        </div>
+        <div>
+            <label class="form-label mb-1">N</label>
+            <input type="number" name="frequency_value" value="1" min="1" class="form-control" style="width:70px">
+        </div>
+        <button type="submit" class="btn btn-primary">Добавить</button>
     </form>
 
+
     {% if not grid %}
-      <p class="text-muted">Пока нет привычек. Добавь первую!</p>
+        <p class="text-muted">Пока нет привычек. Добавь первую!</p>
     {% else %}
-    <div class="table-responsive">
-      <table class="table table-bordered table-sm align-middle">
-        <thead class="table-dark">
-          <tr>
-            <th>Привычка</th>
-            {% for day in days %}
-            <th class="text-center">{{ day|date:"d.m" }}</th>
-            {% endfor %}
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for row in grid %}
-          <tr>
-            <td>{{ row.habit.name }}</td>
-            {% for cell in row.cells %}
-            <td class="text-center">
-              <a href="{% url 'log-toggle' row.habit.pk cell.date|date:'Y-m-d' %}">
-                {% if cell.done %}✅{% else %}⬜{% endif %}
-              </a>
-            </td>
-            {% endfor %}
-            <td>
-              <form method="post" action="{% url 'habit-delete' row.habit.pk %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-sm btn-outline-danger">✕</button>
-              </form>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-sm align-middle">
+                <thead class="table-dark">
+                <tr>
+                    <th>Привычка</th>
+                    {% for day in days %}
+                        <th class="text-center">{{ day|date:"d.m" }}</th>
+                    {% endfor %}
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for row in grid %}
+                    <tr>
+                        <td>{{ row.habit.name }}</td>
+                        {% for cell in row.cells %}
+                            <td class="text-center {% if not cell.scheduled %}table-secondary{% endif %}">
+                                {% if cell.scheduled %}
+                                    <a href="{% url 'log-toggle' row.habit.pk cell.date|date:'Y-m-d' %}">
+                                        {% if cell.done %}✅{% else %}⬜{% endif %}
+                                    </a>
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+
+                        {% endfor %}
+                        <td>
+                            <a href="{% url 'habit-edit' row.habit.pk %}"
+                               class="btn btn-sm btn-outline-secondary">✏️ </a>
+
+                            <form method="post" action="{% url 'habit-delete' row.habit.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger">✕</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
     {% endif %}
 
-  </div>
-  </body>
-  </html>
+</div>
+</body>
+</html>
