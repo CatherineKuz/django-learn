@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -7,6 +8,7 @@ class Habit(models.Model):
         ('every_n_days', 'Каждые N дней'),
     ]
 
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='habits')
     name = models.CharField(max_length=200)
     frequency_type = models.CharField(max_length=20, choices=FREQUENCY_CHOICES, default='daily')
     frequency_value = models.PositiveIntegerField(default=1)
